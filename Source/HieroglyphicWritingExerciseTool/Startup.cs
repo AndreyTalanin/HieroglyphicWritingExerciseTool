@@ -1,5 +1,9 @@
+using HieroglyphicWritingExerciseTool.Configuration;
+using HieroglyphicWritingExerciseTool.Services;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -7,8 +11,11 @@ namespace HieroglyphicWritingExerciseTool;
 
 public class Startup
 {
-    public Startup()
+    private readonly IConfiguration m_configuration;
+
+    public Startup(IConfiguration configuration)
     {
+        m_configuration = configuration;
     }
 
     public void ConfigureServices(IServiceCollection services)
@@ -18,6 +25,10 @@ public class Startup
         services.AddEndpointsApiExplorer();
 
         services.AddSwaggerGen();
+
+        services.Configure<ExerciseGeneratorConfiguration>(m_configuration.GetSection("ExerciseGenerator"));
+
+        services.AddTransient<ExerciseGenerator>();
     }
 
     public void Configure(IApplicationBuilder applicationBuilder, IWebHostEnvironment webHostEnvironment)
