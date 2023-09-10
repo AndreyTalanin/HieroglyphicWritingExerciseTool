@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<HieroglyphDictionary>
+  <Hieroglyphs>
+    <!-- Kanji -->
+    <Hieroglyph Type="Kanji" Character="赤" Pronunciation="Aka" Meaning="Red (Color)" />
+    <Hieroglyph Type="Kanji" Character="緑" Pronunciation="Midori" Meaning="Green (Color)" />
+    <Hieroglyph Type="Kanji" Character="青" Pronunciation="Ao" Meaning="Blue (Color)" />
+    <!-- Hiragana -->
+    <Hieroglyph Type="Hiragana" Character="あ" Pronunciation="A" Syllable="A" />
+    <Hieroglyph Type="Hiragana" Character="い" Pronunciation="I" Syllable="I" />
+    <Hieroglyph Type="Hiragana" Character="う" Pronunciation="U" Syllable="U" />
+    <Hieroglyph Type="Hiragana" Character="え" Pronunciation="E" Syllable="E" />
+    <Hieroglyph Type="Hiragana" Character="お" Pronunciation="O" Syllable="O" />
+    <!-- Katakana -->
+    <Hieroglyph Type="Katakana" Character="ア" Pronunciation="A" Syllable="A" />
+    <Hieroglyph Type="Katakana" Character="イ" Pronunciation="I" Syllable="I" />
+    <Hieroglyph Type="Katakana" Character="ウ" Pronunciation="U" Syllable="U" />
+    <Hieroglyph Type="Katakana" Character="エ" Pronunciation="E" Syllable="E" />
+    <Hieroglyph Type="Katakana" Character="オ" Pronunciation="O" Syllable="O" />
+  </Hieroglyphs>
+</HieroglyphDictionary>
