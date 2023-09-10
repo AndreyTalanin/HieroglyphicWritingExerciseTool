@@ -3,6 +3,7 @@ using HieroglyphicWritingExerciseTool.Services;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,6 +12,8 @@ namespace HieroglyphicWritingExerciseTool;
 
 public class Startup
 {
+    private const string c_clientApplicationPath = "ClientApplication";
+
     private readonly IConfiguration m_configuration;
 
     public Startup(IConfiguration configuration)
@@ -25,6 +28,11 @@ public class Startup
         services.AddEndpointsApiExplorer();
 
         services.AddSwaggerGen();
+
+        services.AddSpaStaticFiles(staticFilesOptions =>
+        {
+            staticFilesOptions.RootPath = $"{c_clientApplicationPath}/build";
+        });
 
         services.Configure<ExerciseGeneratorConfiguration>(m_configuration.GetSection("ExerciseGenerator"));
 
@@ -47,6 +55,9 @@ public class Startup
 
         applicationBuilder.UseHttpsRedirection();
 
+        applicationBuilder.UseStaticFiles();
+        applicationBuilder.UseSpaStaticFiles();
+
         applicationBuilder.UseRouting();
 
         applicationBuilder.UseAuthorization();
@@ -54,6 +65,15 @@ public class Startup
         applicationBuilder.UseEndpoints(endpointRouteBuilder =>
         {
             endpointRouteBuilder.MapControllers();
+        });
+
+        applicationBuilder.UseSpa(spaBuilder =>
+        {
+            spaBuilder.Options.SourcePath = c_clientApplicationPath;
+            if (webHostEnvironment.IsDevelopment())
+            {
+                spaBuilder.UseReactDevelopmentServer(npmScript: "start");
+            }
         });
     }
 }
