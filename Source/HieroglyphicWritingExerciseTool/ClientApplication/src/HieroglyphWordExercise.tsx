@@ -23,6 +23,7 @@ const initialExerciseConfiguration: ExerciseConfiguration = {
 interface HieroglyphWordRecord extends HieroglyphWordModel {
   index: number;
   displayed: boolean;
+  completed: boolean;
 }
 
 const HieroglyphWordExercise = () => {
@@ -56,6 +57,7 @@ const HieroglyphWordExercise = () => {
       const record = {
         index: index,
         displayed: peekedIndexes.has(index) || displayedIndexes.has(index),
+        completed: completedIndexes.has(index),
         ...hieroglyphWord,
       };
 
@@ -74,7 +76,7 @@ const HieroglyphWordExercise = () => {
 
       return record;
     });
-  }, [hieroglyphWords, peekedIndexes, displayedIndexes, hiddenProperties]);
+  }, [hieroglyphWords, peekedIndexes, displayedIndexes, completedIndexes, hiddenProperties]);
 
   const onGenerateButtonClick = useCallback(() => {
     exerciseConfigurationForm.submit();
@@ -176,7 +178,9 @@ const HieroglyphWordExercise = () => {
           <Button size="small" disabled={record.displayed} onClick={() => onDisplayButtonClick(record.index)}>
             Display
           </Button>
-          <Checkbox onChange={(e) => onCompleteCheckboxChanged(record.index, e.target.checked)}>Complete</Checkbox>
+          <Checkbox checked={record.completed} onChange={(e) => onCompleteCheckboxChanged(record.index, e.target.checked)}>
+            Complete
+          </Checkbox>
         </Space>
       ),
     },
