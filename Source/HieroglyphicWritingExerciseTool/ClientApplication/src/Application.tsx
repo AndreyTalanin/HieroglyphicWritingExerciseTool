@@ -1,5 +1,6 @@
 import { Space, Tabs, Typography } from "antd";
 import HieroglyphExercise from "./HieroglyphExercise";
+import HieroglyphWordExercise from "./HieroglyphWordExercise";
 
 import styles from "./Application.module.css";
 
@@ -9,6 +10,11 @@ const Application = () => {
       key: "hieroglyphs",
       label: "Hieroglyphs",
       children: <HieroglyphExercise />,
+    },
+    {
+      key: "hieroglyphWords",
+      label: "Hieroglyph Words",
+      children: <HieroglyphWordExercise />,
     },
   ];
 
