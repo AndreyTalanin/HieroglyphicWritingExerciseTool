@@ -24,18 +24,7 @@ public class ExerciseGenerator
 
     public async Task<HieroglyphModel[]> GenerateHieroglyphExerciseAsync(bool useKanji, bool useKanjiOnly, int size, CancellationToken cancellationToken)
     {
-        HieroglyphDictionary dictionary = await Task.Run(() =>
-        {
-            HieroglyphDictionary? dictionary;
-            using (StreamReader streamReader = new(m_configuration.HieroglyphDictionaryFileName))
-            {
-                XmlSerializer xmlSerializer = new(typeof(HieroglyphDictionary));
-                dictionary = (HieroglyphDictionary?)xmlSerializer.Deserialize(streamReader);
-            }
-            return dictionary is null
-                ? throw new InvalidOperationException($"Can not deserialize the '{m_configuration.HieroglyphDictionaryFileName}' dictionary.")
-                : dictionary;
-        }, cancellationToken);
+        HieroglyphDictionary dictionary = await DeserializeHieroglyphDictionaryAsync(cancellationToken);
 
         Hieroglyph[] hieroglyphsByConfig = dictionary.Hieroglyphs
             .Where(hieroglyph => !useKanjiOnly || hieroglyph.Type == HieroglyphType.Kanji)
@@ -59,5 +48,43 @@ public class ExerciseGenerator
         }
 
         return hieroglyphModels;
+    }
+
+    public async Task<HieroglyphWordModel[]> GenerateHieroglyphWordExerciseAsync(int size, CancellationToken cancellationToken)
+    {
+        HieroglyphDictionary dictionary = await DeserializeHieroglyphDictionaryAsync(cancellationToken);
+
+        HieroglyphWordModel[] hieroglyphWordModels = new HieroglyphWordModel[size];
+        for (int i = 0; i < hieroglyphWordModels.Length; i++)
+        {
+            HieroglyphWord hieroglyphWord = dictionary.HieroglyphWords[Random.Shared.Next(dictionary.HieroglyphWords.Length)];
+
+            string hieroglyphWordType = hieroglyphWord.Type.ToString();
+            hieroglyphWordModels[i] = new HieroglyphWordModel()
+            {
+                Type = hieroglyphWordType,
+                Characters = hieroglyphWord.Characters,
+                Pronunciation = hieroglyphWord.Pronunciation,
+                Meaning = hieroglyphWord.Meaning,
+            };
+        }
+
+        return hieroglyphWordModels;
+    }
+
+    private async Task<HieroglyphDictionary> DeserializeHieroglyphDictionaryAsync(CancellationToken cancellationToken)
+    {
+        return await Task.Run(() =>
+        {
+            HieroglyphDictionary? dictionary;
+            using (StreamReader streamReader = new(m_configuration.HieroglyphDictionaryFileName))
+            {
+                XmlSerializer xmlSerializer = new(typeof(HieroglyphDictionary));
+                dictionary = (HieroglyphDictionary?)xmlSerializer.Deserialize(streamReader);
+            }
+            return dictionary is null
+                ? throw new InvalidOperationException($"Can not deserialize the '{m_configuration.HieroglyphDictionaryFileName}' dictionary.")
+                : dictionary;
+        }, cancellationToken);
     }
 }

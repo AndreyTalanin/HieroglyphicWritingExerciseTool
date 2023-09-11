@@ -18,4 +18,14 @@
     <Hieroglyph Type="Katakana" Character="エ" Pronunciation="E" Syllable="E" />
     <Hieroglyph Type="Katakana" Character="オ" Pronunciation="O" Syllable="O" />
   </Hieroglyphs>
+  <HieroglyphWords>
+    <!-- Hiragana -->
+    <HieroglyphWord Type="Hiragana" Characters="あか" Pronunciation="Aka" Meaning="Red (Color)" />
+    <HieroglyphWord Type="Hiragana" Characters="みどり" Pronunciation="Midori" Meaning="Green (Color)" />
+    <HieroglyphWord Type="Hiragana" Characters="あお" Pronunciation="Ao" Meaning="Blue (Color)" />
+    <!-- Katakana -->
+    <HieroglyphWord Type="Katakana" Characters="アカ" Pronunciation="Aka" Meaning="Red (Color)" />
+    <HieroglyphWord Type="Katakana" Characters="ミドリ" Pronunciation="Midori" Meaning="Green (Color)" />
+    <HieroglyphWord Type="Katakana" Characters="アオ" Pronunciation="Ao" Meaning="Blue (Color)" />
+  </HieroglyphWords>
 </HieroglyphDictionary>

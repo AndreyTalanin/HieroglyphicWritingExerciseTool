@@ -33,4 +33,15 @@ public class ExerciseController : ControllerBase
         GenerateHieroglyphExerciseResponse response = new() { Hieroglyphs = hieroglyphs };
         return Ok(response);
     }
+
+    [HttpPost]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<GenerateHieroglyphWordExerciseResponse>> GenerateHieroglyphWordExerciseAsync([Required][FromBody] GenerateHieroglyphWordExerciseRequest request, CancellationToken cancellationToken)
+    {
+        int size = request.Size;
+        HieroglyphWordModel[] hieroglyphWords = await m_exerciseGenerator.GenerateHieroglyphWordExerciseAsync(size, cancellationToken);
+        GenerateHieroglyphWordExerciseResponse response = new() { HieroglyphWords = hieroglyphWords };
+        return Ok(response);
+    }
 }
