@@ -1,5 +1,5 @@
 import { HieroglyphModel } from "./HieroglyphModel";
 
-export interface GenerateExerciseResponse {
+export interface GenerateHieroglyphExerciseResponse {
   hieroglyphs: HieroglyphModel[];
 }

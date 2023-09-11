@@ -1,6 +1,6 @@
 namespace HieroglyphicWritingExerciseTool.Models;
 
-public class GenerateExerciseRequest
+public class GenerateHieroglyphExerciseRequest
 {
     public bool UseKanji { get; set; }
 

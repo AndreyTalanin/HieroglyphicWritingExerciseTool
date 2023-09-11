@@ -1,4 +1,4 @@
-export interface GenerateExerciseRequest {
+export interface GenerateHieroglyphExerciseRequest {
   useKanji: boolean;
   useKanjiOnly: boolean;
   size: number;

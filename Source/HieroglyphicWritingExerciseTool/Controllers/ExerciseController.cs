@@ -24,13 +24,13 @@ public class ExerciseController : ControllerBase
     [HttpPost]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<GenerateExerciseResponse>> GenerateExerciseAsync([Required][FromBody] GenerateExerciseRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<GenerateHieroglyphExerciseResponse>> GenerateHieroglyphExerciseAsync([Required][FromBody] GenerateHieroglyphExerciseRequest request, CancellationToken cancellationToken)
     {
         bool useKanji = request.UseKanji;
         bool useKanjiOnly = request.UseKanjiOnly;
         int size = request.Size;
-        HieroglyphModel[] hieroglyphs = await m_exerciseGenerator.GenerateExerciseAsync(useKanji, useKanjiOnly, size, cancellationToken);
-        GenerateExerciseResponse response = new() { Hieroglyphs = hieroglyphs };
+        HieroglyphModel[] hieroglyphs = await m_exerciseGenerator.GenerateHieroglyphExerciseAsync(useKanji, useKanjiOnly, size, cancellationToken);
+        GenerateHieroglyphExerciseResponse response = new() { Hieroglyphs = hieroglyphs };
         return Ok(response);
     }
 }

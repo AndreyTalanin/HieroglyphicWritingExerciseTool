@@ -22,7 +22,7 @@ public class ExerciseGenerator
         m_configuration = options.Value;
     }
 
-    public async Task<HieroglyphModel[]> GenerateExerciseAsync(bool useKanji, bool useKanjiOnly, int size, CancellationToken cancellationToken)
+    public async Task<HieroglyphModel[]> GenerateHieroglyphExerciseAsync(bool useKanji, bool useKanjiOnly, int size, CancellationToken cancellationToken)
     {
         HieroglyphDictionary dictionary = await Task.Run(() =>
         {
@@ -50,8 +50,8 @@ public class ExerciseGenerator
             string hieroglyphType = hieroglyph.Type.ToString();
             hieroglyphModels[i] = new HieroglyphModel()
             {
-                Character = hieroglyph.Character,
                 Type = hieroglyphType,
+                Character = hieroglyph.Character,
                 Pronunciation = hieroglyph.Pronunciation,
                 Syllable = hieroglyph.Syllable,
                 Meaning = hieroglyph.Meaning,
