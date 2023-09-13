@@ -159,14 +159,14 @@ const HieroglyphExercise = () => {
       render: (index: number) => 1 + index,
     },
     {
-      key: "type",
-      title: "Type",
-      dataIndex: "type",
-    },
-    {
       key: "character",
       title: "Character",
       dataIndex: "character",
+    },
+    {
+      key: "type",
+      title: "Type",
+      dataIndex: "type",
     },
     {
       key: "pronunciation",
