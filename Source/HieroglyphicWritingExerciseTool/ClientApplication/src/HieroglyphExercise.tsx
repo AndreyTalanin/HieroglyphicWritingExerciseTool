@@ -107,8 +107,9 @@ const HieroglyphExercise = () => {
   const onDisplayButtonClick = useCallback(
     (index: number) => {
       setDisplayedIndexes(new Set<number>([...Array.from(displayedIndexes.values()), index]));
+      setCompletedIndexes(new Set<number>([...Array.from(completedIndexes.values()), index]));
     },
-    [displayedIndexes]
+    [displayedIndexes, completedIndexes]
   );
 
   const onCompleteCheckboxChanged = useCallback(
