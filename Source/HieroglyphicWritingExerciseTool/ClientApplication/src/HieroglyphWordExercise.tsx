@@ -22,6 +22,7 @@ const initialExerciseConfiguration: ExerciseConfiguration = {
 
 interface HieroglyphWordRecord extends HieroglyphWordModel {
   index: number;
+  peeked: boolean;
   displayed: boolean;
   completed: boolean;
 }
@@ -56,21 +57,22 @@ const HieroglyphWordExercise = () => {
     return hieroglyphWords.map((hieroglyphWord, index) => {
       const record = {
         index: index,
+        peeked: peekedIndexes.has(index),
         displayed: peekedIndexes.has(index) || displayedIndexes.has(index),
         completed: completedIndexes.has(index),
         ...hieroglyphWord,
       };
 
-      if (hiddenProperties & HieroglyphWordProperties.Type && !record.displayed) {
+      if (hiddenProperties & HieroglyphWordProperties.Type && !(record.peeked || record.displayed)) {
         record.type = "???";
       }
-      if (hiddenProperties & HieroglyphWordProperties.Characters && !record.displayed) {
+      if (hiddenProperties & HieroglyphWordProperties.Characters && !(record.peeked || record.displayed)) {
         record.characters = "???";
       }
-      if (hiddenProperties & HieroglyphWordProperties.Pronunciation && !record.displayed) {
+      if (hiddenProperties & HieroglyphWordProperties.Pronunciation && !(record.peeked || record.displayed)) {
         record.pronunciation = "???";
       }
-      if (hiddenProperties & HieroglyphWordProperties.Meaning && !record.displayed) {
+      if (hiddenProperties & HieroglyphWordProperties.Meaning && !(record.peeked || record.displayed)) {
         record.meaning = "???";
       }
 
@@ -90,21 +92,6 @@ const HieroglyphWordExercise = () => {
     exerciseConfigurationForm.resetFields();
   }, [exerciseConfigurationForm]);
 
-  const onPeekButtonClick = useCallback(
-    (index: number) => {
-      setPeekedIndexes(new Set<number>([...Array.from(peekedIndexes.values()), index]));
-    },
-    [peekedIndexes]
-  );
-
-  const onDisplayButtonClick = useCallback(
-    (index: number) => {
-      setDisplayedIndexes(new Set<number>([...Array.from(displayedIndexes.values()), index]));
-      setCompletedIndexes(new Set<number>([...Array.from(completedIndexes.values()), index]));
-    },
-    [displayedIndexes, completedIndexes]
-  );
-
   const onCompleteCheckboxChanged = useCallback(
     (index: number, checked: boolean) => {
       if (checked) {
@@ -114,6 +101,22 @@ const HieroglyphWordExercise = () => {
       }
     },
     [completedIndexes]
+  );
+
+  const onPeekButtonClick = useCallback(
+    (index: number) => {
+      setPeekedIndexes(new Set<number>([...Array.from(peekedIndexes.values()), index]));
+      onCompleteCheckboxChanged(index, true);
+    },
+    [peekedIndexes, onCompleteCheckboxChanged]
+  );
+
+  const onDisplayButtonClick = useCallback(
+    (index: number) => {
+      setDisplayedIndexes(new Set<number>([...Array.from(displayedIndexes.values()), index]));
+      onCompleteCheckboxChanged(index, true);
+    },
+    [displayedIndexes, onCompleteCheckboxChanged]
   );
 
   useEffect(() => {
@@ -173,10 +176,10 @@ const HieroglyphWordExercise = () => {
       title: "Action",
       render: (_: any, record: HieroglyphWordRecord) => (
         <Space wrap direction="horizontal" align="baseline">
-          <Button size="small" disabled={record.displayed} onClick={() => onPeekButtonClick(record.index)} danger>
+          <Button size="small" disabled={record.peeked} onClick={() => onPeekButtonClick(record.index)} danger>
             Peek
           </Button>
-          <Button size="small" disabled={record.displayed} onClick={() => onDisplayButtonClick(record.index)}>
+          <Button size="small" disabled={record.peeked || record.displayed} onClick={() => onDisplayButtonClick(record.index)}>
             Display
           </Button>
           <Checkbox checked={record.completed} onChange={(e) => onCompleteCheckboxChanged(record.index, e.target.checked)}>

@@ -26,6 +26,7 @@ const initialExerciseConfiguration: ExerciseConfiguration = {
 
 interface HieroglyphRecord extends HieroglyphModel {
   index: number;
+  peeked: boolean;
   displayed: boolean;
   completed: boolean;
 }
@@ -60,24 +61,25 @@ const HieroglyphExercise = () => {
     return hieroglyphs.map((hieroglyph, index) => {
       const record = {
         index: index,
-        displayed: peekedIndexes.has(index) || displayedIndexes.has(index),
+        peeked: peekedIndexes.has(index),
+        displayed: displayedIndexes.has(index),
         completed: completedIndexes.has(index),
         ...hieroglyph,
       };
 
-      if (hiddenProperties & HieroglyphProperties.Type && !record.displayed) {
+      if (hiddenProperties & HieroglyphProperties.Type && !(record.peeked || record.displayed)) {
         record.type = "???";
       }
-      if (hiddenProperties & HieroglyphProperties.Character && !record.displayed) {
+      if (hiddenProperties & HieroglyphProperties.Character && !(record.peeked || record.displayed)) {
         record.character = "???";
       }
-      if (hiddenProperties & HieroglyphProperties.Pronunciation && !record.displayed) {
+      if (hiddenProperties & HieroglyphProperties.Pronunciation && !(record.peeked || record.displayed)) {
         record.pronunciation = "???";
       }
-      if (hiddenProperties & HieroglyphProperties.Syllable && !record.displayed) {
+      if (hiddenProperties & HieroglyphProperties.Syllable && !(record.peeked || record.displayed)) {
         record.syllable = "???";
       }
-      if (hiddenProperties & HieroglyphProperties.Meaning && !record.displayed) {
+      if (hiddenProperties & HieroglyphProperties.Meaning && !(record.peeked || record.displayed)) {
         record.meaning = "???";
       }
 
@@ -97,21 +99,6 @@ const HieroglyphExercise = () => {
     exerciseConfigurationForm.resetFields();
   }, [exerciseConfigurationForm]);
 
-  const onPeekButtonClick = useCallback(
-    (index: number) => {
-      setPeekedIndexes(new Set<number>([...Array.from(peekedIndexes.values()), index]));
-    },
-    [peekedIndexes]
-  );
-
-  const onDisplayButtonClick = useCallback(
-    (index: number) => {
-      setDisplayedIndexes(new Set<number>([...Array.from(displayedIndexes.values()), index]));
-      setCompletedIndexes(new Set<number>([...Array.from(completedIndexes.values()), index]));
-    },
-    [displayedIndexes, completedIndexes]
-  );
-
   const onCompleteCheckboxChanged = useCallback(
     (index: number, checked: boolean) => {
       if (checked) {
@@ -121,6 +108,22 @@ const HieroglyphExercise = () => {
       }
     },
     [completedIndexes]
+  );
+
+  const onPeekButtonClick = useCallback(
+    (index: number) => {
+      setPeekedIndexes(new Set<number>([...Array.from(peekedIndexes.values()), index]));
+      onCompleteCheckboxChanged(index, true);
+    },
+    [peekedIndexes, onCompleteCheckboxChanged]
+  );
+
+  const onDisplayButtonClick = useCallback(
+    (index: number) => {
+      setDisplayedIndexes(new Set<number>([...Array.from(displayedIndexes.values()), index]));
+      onCompleteCheckboxChanged(index, true);
+    },
+    [displayedIndexes, onCompleteCheckboxChanged]
   );
 
   useEffect(() => {
@@ -191,10 +194,10 @@ const HieroglyphExercise = () => {
       title: "Action",
       render: (_: any, record: HieroglyphRecord) => (
         <Space wrap direction="horizontal" align="baseline">
-          <Button size="small" disabled={record.displayed} onClick={() => onPeekButtonClick(record.index)} danger>
+          <Button size="small" disabled={record.peeked} onClick={() => onPeekButtonClick(record.index)} danger>
             Peek
           </Button>
-          <Button size="small" disabled={record.displayed} onClick={() => onDisplayButtonClick(record.index)}>
+          <Button size="small" disabled={record.peeked || record.displayed} onClick={() => onDisplayButtonClick(record.index)}>
             Display
           </Button>
           <Checkbox checked={record.completed} onChange={(e) => onCompleteCheckboxChanged(record.index, e.target.checked)}>
