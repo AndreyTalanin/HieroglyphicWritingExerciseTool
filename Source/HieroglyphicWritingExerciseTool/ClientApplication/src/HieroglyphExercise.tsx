@@ -6,7 +6,7 @@ import { HieroglyphModel } from "./models/HieroglyphModel";
 
 import styles from "./HieroglyphExercise.module.css";
 
-type ExerciseMode = "type" | "type-pronunciation" | "full-description" | "character";
+type ExerciseMode = "type" | "type-pronunciation" | "character" | "character-pronunciation" | "full-description";
 
 const defaultExerciseMode: ExerciseMode = "character";
 
@@ -50,10 +50,13 @@ const HieroglyphExercise = () => {
       return HieroglyphProperties.Type;
     } else if (mode === "type-pronunciation") {
       return HieroglyphProperties.Type | HieroglyphProperties.Pronunciation;
-    } else if (mode === "full-description") {
-      return HieroglyphProperties.Type | HieroglyphProperties.Pronunciation | HieroglyphProperties.Syllable | HieroglyphProperties.Meaning;
-    } else {
+    } else if (mode === "character") {
       return HieroglyphProperties.Character;
+    } else if (mode === "character-pronunciation") {
+      return HieroglyphProperties.Character | HieroglyphProperties.Pronunciation;
+    } else {
+      /* if (mode === "full-description") */
+      return HieroglyphProperties.Type | HieroglyphProperties.Pronunciation | HieroglyphProperties.Syllable | HieroglyphProperties.Meaning;
     }
   }, [mode]);
 
@@ -251,8 +254,9 @@ const HieroglyphExercise = () => {
             <Select placeholder="Select a mode">
               <Select.Option value="type">Type</Select.Option>
               <Select.Option value="type-pronunciation">Type & Pronunciation</Select.Option>
-              <Select.Option value="full-description">Full Description</Select.Option>
               <Select.Option value="character">Character</Select.Option>
+              <Select.Option value="character-pronunciation">Character & Pronunciation</Select.Option>
+              <Select.Option value="full-description">Full Description</Select.Option>
             </Select>
           </Form.Item>
         </Form>
