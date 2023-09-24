@@ -1,8 +1,10 @@
 import { Button, Card, Checkbox, Form, InputNumber, Select, Space, Table } from "antd";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { generateHieroglyphWordExercise } from "./api/requests";
+import { generateHieroglyphWordExercise, processExerciseStatistics } from "./api/requests";
+import { ExerciseStatistics } from "./entities/ExerciseStatistics";
 import { HieroglyphWordProperties } from "./entities/HieroglyphWordProperties";
 import { HieroglyphWordModel } from "./models/HieroglyphWordModel";
+import { ProcessExerciseStatisticsRequest } from "./models/ProcessExerciseStatisticsRequest";
 
 import styles from "./HieroglyphWordExercise.module.css";
 
@@ -29,10 +31,13 @@ interface HieroglyphWordRecord extends HieroglyphWordModel {
 
 const HieroglyphWordExercise = () => {
   const [mode, setMode] = useState<ExerciseMode>(defaultExerciseMode);
+  const [startedOn, setStartedOn] = useState<Date>(new Date());
   const [hieroglyphWords, setHieroglyphWords] = useState<HieroglyphWordModel[]>([]);
   const [peekedIndexes, setPeekedIndexes] = useState<Set<number>>(new Set<number>());
   const [displayedIndexes, setDisplayedIndexes] = useState<Set<number>>(new Set<number>());
   const [completedIndexes, setCompletedIndexes] = useState<Set<number>>(new Set<number>());
+  const [completed, setCompleted] = useState<boolean>(false);
+  const [statistics, setStatistics] = useState<ExerciseStatistics>();
 
   const [exerciseConfigurationForm] = Form.useForm<ExerciseConfiguration>();
 
@@ -88,10 +93,13 @@ const HieroglyphWordExercise = () => {
   }, [exerciseConfigurationForm]);
 
   const onResetButtonClick = useCallback(() => {
+    setStartedOn(new Date());
     setHieroglyphWords([]);
     setPeekedIndexes(new Set<number>());
     setDisplayedIndexes(new Set<number>());
     setCompletedIndexes(new Set<number>());
+    setCompleted(false);
+    setStatistics(undefined);
     exerciseConfigurationForm.resetFields();
   }, [exerciseConfigurationForm]);
 
@@ -123,10 +131,26 @@ const HieroglyphWordExercise = () => {
   );
 
   useEffect(() => {
-    if (hieroglyphWordsTotal === hieroglyphWordsCompleted && hieroglyphWordsTotal !== 0) {
-      window.location.href = "#hieroglyphWordExerciseResultsCard";
+    if (!completed && hieroglyphWordsTotal === hieroglyphWordsCompleted && hieroglyphWordsTotal !== 0) {
+      setCompleted(true);
+      const completedOn = new Date();
+      const request: ProcessExerciseStatisticsRequest = {
+        exerciseSize: hieroglyphWordsTotal,
+        totalTimeMilliseconds: completedOn.getTime() - startedOn.getTime(),
+        key: `hieroglyph-word-exercise-${mode}`,
+        writeStatistics: hieroglyphWordsPeeked === 0,
+      };
+      processExerciseStatistics(request).then((response) => {
+        window.location.href = "#hieroglyphWordExerciseResultsCard";
+        setStatistics({
+          currentTimeMilliseconds: response.currentTimeMilliseconds,
+          averageTimeMilliseconds: response.averageTimeMilliseconds,
+          minTimeMilliseconds: response.minTimeMilliseconds,
+          maxTimeMilliseconds: response.maxTimeMilliseconds,
+        });
+      });
     }
-  }, [hieroglyphWordsTotal, hieroglyphWordsCompleted]);
+  }, [mode, startedOn, completed, hieroglyphWordsTotal, hieroglyphWordsPeeked, hieroglyphWordsCompleted]);
 
   const onBackToTopButtonClick = useCallback(() => {
     window.scrollTo({ top: 0 });
@@ -136,10 +160,13 @@ const HieroglyphWordExercise = () => {
     const { size, mode } = exerciseConfiguration;
     generateHieroglyphWordExercise({ size: size }).then((response) => {
       setMode(mode);
+      setStartedOn(new Date());
       setHieroglyphWords(response.hieroglyphWords);
       setPeekedIndexes(new Set<number>());
       setDisplayedIndexes(new Set<number>());
       setCompletedIndexes(new Set<number>());
+      setCompleted(false);
+      setStatistics(undefined);
     });
   };
 
@@ -147,51 +174,95 @@ const HieroglyphWordExercise = () => {
     alert("Form validation failed.");
   };
 
-  const columns = [
-    {
-      key: "index",
-      title: "#",
-      dataIndex: "index",
-      render: (index: number) => 1 + index,
-    },
-    {
-      key: "characters",
-      title: "Characters",
-      dataIndex: "characters",
-    },
-    {
-      key: "type",
-      title: "Type",
-      dataIndex: "type",
-    },
-    {
-      key: "pronunciation",
-      title: "Pronunciation",
-      dataIndex: "pronunciation",
-    },
-    {
-      key: "meaning",
-      title: "Meaning",
-      dataIndex: "meaning",
-    },
-    {
-      key: "action",
-      title: "Action",
-      render: (_: any, record: HieroglyphWordRecord) => (
-        <Space wrap direction="horizontal" align="baseline">
-          <Button size="small" disabled={record.peeked} onClick={() => onPeekButtonClick(record.index)} danger>
-            Peek
-          </Button>
-          <Button size="small" disabled={record.peeked || record.displayed} onClick={() => onDisplayButtonClick(record.index)}>
-            Display
-          </Button>
-          <Checkbox checked={record.completed} onChange={(e) => onCompleteCheckboxChanged(record.index, e.target.checked)}>
-            Complete
-          </Checkbox>
-        </Space>
-      ),
-    },
-  ];
+  const columns = useMemo(
+    () => [
+      {
+        key: "index",
+        title: "#",
+        dataIndex: "index",
+        render: (index: number) => 1 + index,
+      },
+      {
+        key: "characters",
+        title: "Characters",
+        dataIndex: "characters",
+      },
+      {
+        key: "type",
+        title: "Type",
+        dataIndex: "type",
+      },
+      {
+        key: "pronunciation",
+        title: "Pronunciation",
+        dataIndex: "pronunciation",
+      },
+      {
+        key: "meaning",
+        title: "Meaning",
+        dataIndex: "meaning",
+      },
+      {
+        key: "action",
+        title: "Action",
+        render: (_: any, record: HieroglyphWordRecord) => (
+          <Space wrap direction="horizontal" align="baseline">
+            <Button size="small" disabled={record.peeked} onClick={() => onPeekButtonClick(record.index)} danger>
+              Peek
+            </Button>
+            <Button size="small" disabled={record.peeked || record.displayed} onClick={() => onDisplayButtonClick(record.index)}>
+              Display
+            </Button>
+            <Checkbox disabled={completed} checked={record.completed} onChange={(e) => onCompleteCheckboxChanged(record.index, e.target.checked)}>
+              Complete
+            </Checkbox>
+          </Space>
+        ),
+      },
+    ],
+    [completed, onPeekButtonClick, onDisplayButtonClick, onCompleteCheckboxChanged]
+  );
+
+  const statisticsParagraph = useMemo(() => {
+    if (statistics === undefined) {
+      return undefined;
+    }
+
+    let text = "";
+    if (statistics.currentTimeMilliseconds < statistics.minTimeMilliseconds) {
+      text =
+        `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is the new min value! ` +
+        `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
+        `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
+        `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
+    } else if (statistics.currentTimeMilliseconds > statistics.maxTimeMilliseconds) {
+      text =
+        `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is the new max value! ` +
+        `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
+        `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
+        `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
+    } else if (statistics.currentTimeMilliseconds < statistics.averageTimeMilliseconds - 0.05) {
+      text =
+        `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is below average. ` +
+        `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
+        `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
+        `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
+    } else if (statistics.currentTimeMilliseconds > statistics.averageTimeMilliseconds + 0.05) {
+      text =
+        `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is above average. ` +
+        `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
+        `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
+        `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
+    } else {
+      text =
+        `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is the average value. ` +
+        `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
+        `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
+        `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
+    }
+
+    return <p>{text}</p>;
+  }, [statistics]);
 
   return (
     <>
@@ -262,6 +333,7 @@ const HieroglyphWordExercise = () => {
           Hieroglyph words completed: {hieroglyphWordsCompleted} of {hieroglyphWordsTotal} (
           {((100 * hieroglyphWordsCompleted) / hieroglyphWordsTotalDivisionSafe).toFixed(2)} %).
         </p>
+        {statistics && statisticsParagraph}
       </Card>
     </>
   );
