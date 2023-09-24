@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -43,6 +44,10 @@ public class StatisticsRepository
     {
         return await Task.Run(() =>
         {
+            storage.StatisticsSections = storage.StatisticsSections
+                .OrderBy(section => section.Key)
+                .ToArray();
+
             try
             {
                 using StreamWriter streamWriter = new(m_configuration.StatisticsStorageFileName);
