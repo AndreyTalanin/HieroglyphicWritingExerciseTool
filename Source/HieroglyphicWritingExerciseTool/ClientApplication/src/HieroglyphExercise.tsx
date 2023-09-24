@@ -1,6 +1,6 @@
 import { Button, Card, Checkbox, Form, InputNumber, Select, Space, Table, Typography } from "antd";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { generateHieroglyphExercise, processExerciseStatistics } from "./api/requests";
+import { generateHieroglyphExercise, getDefaultExerciseSize, processExerciseStatistics } from "./api/requests";
 import { ExerciseStatistics } from "./entities/ExerciseStatistics";
 import { HieroglyphProperties } from "./entities/HieroglyphProperties";
 import { HieroglyphModel } from "./models/HieroglyphModel";
@@ -19,13 +19,6 @@ interface ExerciseConfiguration {
   mode: ExerciseMode;
 }
 
-const initialExerciseConfiguration: ExerciseConfiguration = {
-  useKanji: false,
-  useKanjiOnly: false,
-  size: 36,
-  mode: defaultExerciseMode,
-};
-
 interface HieroglyphRecord extends HieroglyphModel {
   index: number;
   peeked: boolean;
@@ -42,6 +35,12 @@ const HieroglyphExercise = () => {
   const [completedIndexes, setCompletedIndexes] = useState<Set<number>>(new Set<number>());
   const [completed, setCompleted] = useState<boolean>(false);
   const [statistics, setStatistics] = useState<ExerciseStatistics>();
+  const [initialExerciseConfiguration, setInitialExerciseConfiguration] = useState<ExerciseConfiguration>({
+    useKanji: false,
+    useKanjiOnly: false,
+    size: 36,
+    mode: defaultExerciseMode,
+  });
 
   const [exerciseConfigurationForm] = Form.useForm<ExerciseConfiguration>();
 
@@ -136,6 +135,16 @@ const HieroglyphExercise = () => {
     },
     [displayedIndexes, onCompleteCheckboxChanged]
   );
+
+  useEffect(() => {
+    getDefaultExerciseSize()
+      .then((response) => {
+        setInitialExerciseConfiguration((initialExerciseConfiguration) => ({ ...initialExerciseConfiguration, size: response.defaultExerciseSize }));
+      })
+      .catch();
+  }, [exerciseConfigurationForm]);
+
+  useEffect(() => exerciseConfigurationForm.resetFields(), [initialExerciseConfiguration, exerciseConfigurationForm]);
 
   useEffect(() => {
     if (!completed && hieroglyphsTotal === hieroglyphsCompleted && hieroglyphsTotal !== 0) {

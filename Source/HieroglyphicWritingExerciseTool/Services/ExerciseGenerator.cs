@@ -22,6 +22,11 @@ public class ExerciseGenerator
         m_configuration = options.Value;
     }
 
+    public int GetDefaultExerciseSize()
+    {
+        return m_configuration.DefaultExerciseSize;
+    }
+
     public async Task<HieroglyphModel[]> GenerateHieroglyphExerciseAsync(bool useKanji, bool useKanjiOnly, int size, CancellationToken cancellationToken)
     {
         HieroglyphDictionary dictionary = await DeserializeHieroglyphDictionaryAsync(cancellationToken);

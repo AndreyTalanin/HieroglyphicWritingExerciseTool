@@ -21,6 +21,16 @@ public class ExerciseController : ControllerBase
         m_exerciseGenerator = exerciseGenerator;
     }
 
+    [HttpGet]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult<int> GetDefaultExerciseSize()
+    {
+        int defaultExerciseSize = m_exerciseGenerator.GetDefaultExerciseSize();
+        GetDefaultExerciseSizeResponse response = new() { DefaultExerciseSize = defaultExerciseSize };
+        return Ok(response);
+    }
+
     [HttpPost]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]

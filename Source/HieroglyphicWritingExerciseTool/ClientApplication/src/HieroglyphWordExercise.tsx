@@ -1,6 +1,6 @@
 import { Button, Card, Checkbox, Form, InputNumber, Select, Space, Table } from "antd";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { generateHieroglyphWordExercise, processExerciseStatistics } from "./api/requests";
+import { generateHieroglyphWordExercise, getDefaultExerciseSize, processExerciseStatistics } from "./api/requests";
 import { ExerciseStatistics } from "./entities/ExerciseStatistics";
 import { HieroglyphWordProperties } from "./entities/HieroglyphWordProperties";
 import { HieroglyphWordModel } from "./models/HieroglyphWordModel";
@@ -16,11 +16,6 @@ interface ExerciseConfiguration {
   size: number;
   mode: ExerciseMode;
 }
-
-const initialExerciseConfiguration: ExerciseConfiguration = {
-  size: 36,
-  mode: defaultExerciseMode,
-};
 
 interface HieroglyphWordRecord extends HieroglyphWordModel {
   index: number;
@@ -38,6 +33,10 @@ const HieroglyphWordExercise = () => {
   const [completedIndexes, setCompletedIndexes] = useState<Set<number>>(new Set<number>());
   const [completed, setCompleted] = useState<boolean>(false);
   const [statistics, setStatistics] = useState<ExerciseStatistics>();
+  const [initialExerciseConfiguration, setInitialExerciseConfiguration] = useState<ExerciseConfiguration>({
+    size: 36,
+    mode: defaultExerciseMode,
+  });
 
   const [exerciseConfigurationForm] = Form.useForm<ExerciseConfiguration>();
 
@@ -129,6 +128,16 @@ const HieroglyphWordExercise = () => {
     },
     [displayedIndexes, onCompleteCheckboxChanged]
   );
+
+  useEffect(() => {
+    getDefaultExerciseSize()
+      .then((response) => {
+        setInitialExerciseConfiguration((initialExerciseConfiguration) => ({ ...initialExerciseConfiguration, size: response.defaultExerciseSize }));
+      })
+      .catch();
+  }, [exerciseConfigurationForm]);
+
+  useEffect(() => exerciseConfigurationForm.resetFields(), [initialExerciseConfiguration, exerciseConfigurationForm]);
 
   useEffect(() => {
     if (!completed && hieroglyphWordsTotal === hieroglyphWordsCompleted && hieroglyphWordsTotal !== 0) {
