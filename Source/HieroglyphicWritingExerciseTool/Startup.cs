@@ -1,4 +1,5 @@
 using HieroglyphicWritingExerciseTool.Configuration;
+using HieroglyphicWritingExerciseTool.Data;
 using HieroglyphicWritingExerciseTool.Services;
 
 using Microsoft.AspNetCore.Builder;
@@ -35,8 +36,12 @@ public class Startup
         });
 
         services.Configure<ExerciseGeneratorConfiguration>(m_configuration.GetSection("ExerciseGenerator"));
+        services.Configure<StatisticsStorageConfiguration>(m_configuration.GetSection("StatisticsStorage"));
+
+        services.AddTransient<StatisticsRepository>();
 
         services.AddTransient<ExerciseGenerator>();
+        services.AddTransient<StatisticsService>();
     }
 
     public void Configure(IApplicationBuilder applicationBuilder, IWebHostEnvironment webHostEnvironment)
