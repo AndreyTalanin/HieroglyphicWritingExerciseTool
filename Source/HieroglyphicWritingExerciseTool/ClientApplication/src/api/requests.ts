@@ -3,8 +3,18 @@ import { GenerateHieroglyphExerciseRequest } from "../models/GenerateHieroglyphE
 import { GenerateHieroglyphExerciseResponse } from "../models/GenerateHieroglyphExerciseResponse";
 import { GenerateHieroglyphWordExerciseRequest } from "../models/GenerateHieroglyphWordExerciseRequest";
 import { GenerateHieroglyphWordExerciseResponse } from "../models/GenerateHieroglyphWordExerciseResponse";
+import { GetDefaultExerciseSizeResponse } from "../models/GetDefaultExerciseSizeResponse";
 import { ProcessExerciseStatisticsRequest } from "../models/ProcessExerciseStatisticsRequest";
 import { ProcessExerciseStatisticsResponse } from "../models/ProcessExerciseStatisticsResponse";
+
+export async function getDefaultExerciseSize(): Promise<GetDefaultExerciseSizeResponse> {
+  try {
+    const { data } = await axios.get(`/api/Exercise/GetDefaultExerciseSize`);
+    return data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
 
 export async function generateHieroglyphExercise(request: GenerateHieroglyphExerciseRequest): Promise<GenerateHieroglyphExerciseResponse> {
   try {
