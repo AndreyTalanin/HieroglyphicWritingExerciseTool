@@ -1,8 +1,10 @@
 import { Button, Card, Checkbox, Form, InputNumber, Select, Space, Table, Typography } from "antd";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { generateHieroglyphExercise } from "./api/requests";
+import { generateHieroglyphExercise, processExerciseStatistics } from "./api/requests";
+import { ExerciseStatistics } from "./entities/ExerciseStatistics";
 import { HieroglyphProperties } from "./entities/HieroglyphProperties";
 import { HieroglyphModel } from "./models/HieroglyphModel";
+import { ProcessExerciseStatisticsRequest } from "./models/ProcessExerciseStatisticsRequest";
 
 import styles from "./HieroglyphExercise.module.css";
 
@@ -33,10 +35,13 @@ interface HieroglyphRecord extends HieroglyphModel {
 
 const HieroglyphExercise = () => {
   const [mode, setMode] = useState<ExerciseMode>(defaultExerciseMode);
+  const [startedOn, setStartedOn] = useState<Date>(new Date());
   const [hieroglyphs, setHieroglyphs] = useState<HieroglyphModel[]>([]);
   const [peekedIndexes, setPeekedIndexes] = useState<Set<number>>(new Set<number>());
   const [displayedIndexes, setDisplayedIndexes] = useState<Set<number>>(new Set<number>());
   const [completedIndexes, setCompletedIndexes] = useState<Set<number>>(new Set<number>());
+  const [completed, setCompleted] = useState<boolean>(false);
+  const [statistics, setStatistics] = useState<ExerciseStatistics>();
 
   const [exerciseConfigurationForm] = Form.useForm<ExerciseConfiguration>();
 
@@ -95,10 +100,13 @@ const HieroglyphExercise = () => {
   }, [exerciseConfigurationForm]);
 
   const onResetButtonClick = useCallback(() => {
+    setStartedOn(new Date());
     setHieroglyphs([]);
     setPeekedIndexes(new Set<number>());
     setDisplayedIndexes(new Set<number>());
     setCompletedIndexes(new Set<number>());
+    setCompleted(false);
+    setStatistics(undefined);
     exerciseConfigurationForm.resetFields();
   }, [exerciseConfigurationForm]);
 
@@ -130,10 +138,26 @@ const HieroglyphExercise = () => {
   );
 
   useEffect(() => {
-    if (hieroglyphsTotal === hieroglyphsCompleted && hieroglyphsTotal !== 0) {
-      window.location.href = "#hieroglyphExerciseResultsCard";
+    if (!completed && hieroglyphsTotal === hieroglyphsCompleted && hieroglyphsTotal !== 0) {
+      setCompleted(true);
+      const completedOn = new Date();
+      const request: ProcessExerciseStatisticsRequest = {
+        exerciseSize: hieroglyphsTotal,
+        totalTimeMilliseconds: completedOn.getTime() - startedOn.getTime(),
+        key: `hieroglyph-exercise-${mode}`,
+        writeStatistics: hieroglyphsPeeked === 0,
+      };
+      processExerciseStatistics(request).then((response) => {
+        window.location.href = "#hieroglyphExerciseResultsCard";
+        setStatistics({
+          currentTimeMilliseconds: response.currentTimeMilliseconds,
+          averageTimeMilliseconds: response.averageTimeMilliseconds,
+          minTimeMilliseconds: response.minTimeMilliseconds,
+          maxTimeMilliseconds: response.maxTimeMilliseconds,
+        });
+      });
     }
-  }, [hieroglyphsTotal, hieroglyphsCompleted]);
+  }, [mode, startedOn, completed, hieroglyphsTotal, hieroglyphsPeeked, hieroglyphsCompleted]);
 
   const onBackToTopButtonClick = useCallback(() => {
     window.scrollTo({ top: 0 });
@@ -147,10 +171,13 @@ const HieroglyphExercise = () => {
       size: size,
     }).then((response) => {
       setMode(mode);
+      setStartedOn(new Date());
       setHieroglyphs(response.hieroglyphs);
       setPeekedIndexes(new Set<number>());
       setDisplayedIndexes(new Set<number>());
       setCompletedIndexes(new Set<number>());
+      setCompleted(false);
+      setStatistics(undefined);
     });
   };
 
@@ -158,58 +185,102 @@ const HieroglyphExercise = () => {
     alert("Form validation failed.");
   };
 
-  const columns = [
-    {
-      key: "index",
-      title: "#",
-      dataIndex: "index",
-      render: (index: number) => 1 + index,
-    },
-    {
-      key: "character",
-      title: "Character",
-      dataIndex: "character",
-    },
-    {
-      key: "type",
-      title: "Type",
-      dataIndex: "type",
-    },
-    {
-      key: "pronunciation",
-      title: "Pronunciation",
-      dataIndex: "pronunciation",
-    },
-    {
-      key: "syllable",
-      title: "Syllable (?)",
-      dataIndex: "syllable",
-      render: (syllable?: string) => syllable ?? <Typography.Text type="secondary">N/A</Typography.Text>,
-    },
-    {
-      key: "meaning",
-      title: "Meaning (?)",
-      dataIndex: "meaning",
-      render: (meaning?: string) => meaning ?? <Typography.Text type="secondary">N/A</Typography.Text>,
-    },
-    {
-      key: "action",
-      title: "Action",
-      render: (_: any, record: HieroglyphRecord) => (
-        <Space wrap direction="horizontal" align="baseline">
-          <Button size="small" disabled={record.peeked} onClick={() => onPeekButtonClick(record.index)} danger>
-            Peek
-          </Button>
-          <Button size="small" disabled={record.peeked || record.displayed} onClick={() => onDisplayButtonClick(record.index)}>
-            Display
-          </Button>
-          <Checkbox checked={record.completed} onChange={(e) => onCompleteCheckboxChanged(record.index, e.target.checked)}>
-            Complete
-          </Checkbox>
-        </Space>
-      ),
-    },
-  ];
+  const columns = useMemo(
+    () => [
+      {
+        key: "index",
+        title: "#",
+        dataIndex: "index",
+        render: (index: number) => 1 + index,
+      },
+      {
+        key: "character",
+        title: "Character",
+        dataIndex: "character",
+      },
+      {
+        key: "type",
+        title: "Type",
+        dataIndex: "type",
+      },
+      {
+        key: "pronunciation",
+        title: "Pronunciation",
+        dataIndex: "pronunciation",
+      },
+      {
+        key: "syllable",
+        title: "Syllable (?)",
+        dataIndex: "syllable",
+        render: (syllable?: string) => syllable ?? <Typography.Text type="secondary">N/A</Typography.Text>,
+      },
+      {
+        key: "meaning",
+        title: "Meaning (?)",
+        dataIndex: "meaning",
+        render: (meaning?: string) => meaning ?? <Typography.Text type="secondary">N/A</Typography.Text>,
+      },
+      {
+        key: "action",
+        title: "Action",
+        render: (_: any, record: HieroglyphRecord) => (
+          <Space wrap direction="horizontal" align="baseline">
+            <Button size="small" disabled={record.peeked} onClick={() => onPeekButtonClick(record.index)} danger>
+              Peek
+            </Button>
+            <Button size="small" disabled={record.peeked || record.displayed} onClick={() => onDisplayButtonClick(record.index)}>
+              Display
+            </Button>
+            <Checkbox disabled={completed} checked={record.completed} onChange={(e) => onCompleteCheckboxChanged(record.index, e.target.checked)}>
+              Complete
+            </Checkbox>
+          </Space>
+        ),
+      },
+    ],
+    [completed, onPeekButtonClick, onDisplayButtonClick, onCompleteCheckboxChanged]
+  );
+
+  const statisticsParagraph = useMemo(() => {
+    if (statistics === undefined) {
+      return undefined;
+    }
+
+    let text = "";
+    if (statistics.currentTimeMilliseconds < statistics.minTimeMilliseconds) {
+      text =
+        `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is the new min value! ` +
+        `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
+        `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
+        `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
+    } else if (statistics.currentTimeMilliseconds > statistics.maxTimeMilliseconds) {
+      text =
+        `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is the new max value! ` +
+        `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
+        `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
+        `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
+    } else if (statistics.currentTimeMilliseconds < statistics.averageTimeMilliseconds - 0.05) {
+      text =
+        `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is below average. ` +
+        `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
+        `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
+        `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
+    } else if (statistics.currentTimeMilliseconds > statistics.averageTimeMilliseconds + 0.05) {
+      text =
+        `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is above average. ` +
+        `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
+        `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
+        `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
+    } else {
+      text =
+        `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is the average value. ` +
+        `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
+        `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
+        `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
+    }
+
+    return <p>{text}</p>;
+  }, [statistics]);
 
   return (
     <>
@@ -284,6 +355,7 @@ const HieroglyphExercise = () => {
         <p>
           Hieroglyphs completed: {hieroglyphsCompleted} of {hieroglyphsTotal} ({((100 * hieroglyphsCompleted) / hieroglyphsTotalDivisionSafe).toFixed(2)} %).
         </p>
+        {statistics && statisticsParagraph}
       </Card>
     </>
   );
