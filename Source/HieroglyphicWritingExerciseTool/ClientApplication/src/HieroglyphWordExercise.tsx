@@ -116,9 +116,10 @@ const HieroglyphWordExercise = () => {
   const onPeekButtonClick = useCallback(
     (index: number) => {
       setPeekedIndexes(new Set<number>([...Array.from(peekedIndexes.values()), index]));
+      setDisplayedIndexes(new Set<number>(Array.from(displayedIndexes.values()).filter((keyToCompare) => index !== keyToCompare)));
       onCompleteCheckboxChanged(index, true);
     },
-    [peekedIndexes, onCompleteCheckboxChanged]
+    [peekedIndexes, displayedIndexes, onCompleteCheckboxChanged]
   );
 
   const onDisplayButtonClick = useCallback(
