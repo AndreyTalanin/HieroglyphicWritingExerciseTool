@@ -32,6 +32,9 @@ public class ExerciseGenerator
         HieroglyphDictionary dictionary = await DeserializeHieroglyphDictionaryAsync(cancellationToken);
 
         Hieroglyph[] hieroglyphsByConfig = dictionary.Hieroglyphs
+            .Concat(dictionary.HieroglyphGroups
+                .Where(hieroglyphGroup => hieroglyphGroup.Enabled)
+                .SelectMany(hieroglyphGroup => hieroglyphGroup.Hieroglyphs))
             .Where(hieroglyph => !useKanjiOnly || hieroglyph.Type == HieroglyphType.Kanji)
             .Where(hieroglyph => useKanji || hieroglyph.Type != HieroglyphType.Kanji)
             .ToArray();
@@ -59,10 +62,16 @@ public class ExerciseGenerator
     {
         HieroglyphDictionary dictionary = await DeserializeHieroglyphDictionaryAsync(cancellationToken);
 
+        HieroglyphWord[] hieroglyphWordsByConfig = dictionary.HieroglyphWords
+            .Concat(dictionary.HieroglyphWordGroups
+                .Where(hieroglyphWordGroup => hieroglyphWordGroup.Enabled)
+                .SelectMany(hieroglyphWordGroup => hieroglyphWordGroup.HieroglyphWords))
+            .ToArray();
+
         HieroglyphWordModel[] hieroglyphWordModels = new HieroglyphWordModel[size];
         for (int i = 0; i < hieroglyphWordModels.Length; i++)
         {
-            HieroglyphWord hieroglyphWord = dictionary.HieroglyphWords[Random.Shared.Next(dictionary.HieroglyphWords.Length)];
+            HieroglyphWord hieroglyphWord = hieroglyphWordsByConfig[Random.Shared.Next(hieroglyphWordsByConfig.Length)];
 
             string hieroglyphWordType = hieroglyphWord.Type.ToString();
             hieroglyphWordModels[i] = new HieroglyphWordModel()
