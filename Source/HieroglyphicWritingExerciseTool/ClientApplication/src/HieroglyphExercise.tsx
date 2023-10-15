@@ -258,36 +258,21 @@ const HieroglyphExercise = () => {
 
     let text = "";
     if (statistics.currentTimeMilliseconds < statistics.minTimeMilliseconds) {
-      text =
-        `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is the new min value! ` +
-        `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
-        `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
-        `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
+      text = `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is the new min value! `;
     } else if (statistics.currentTimeMilliseconds > statistics.maxTimeMilliseconds) {
-      text =
-        `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is the new max value! ` +
-        `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
-        `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
-        `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
+      text = `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is the new max value! `;
     } else if (statistics.currentTimeMilliseconds < statistics.averageTimeMilliseconds - 0.05) {
-      text =
-        `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is below average. ` +
-        `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
-        `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
-        `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
+      text = `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is below average. `;
     } else if (statistics.currentTimeMilliseconds > statistics.averageTimeMilliseconds + 0.05) {
-      text =
-        `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is above average. ` +
-        `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
-        `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
-        `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
+      text = `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is above average. `;
     } else {
-      text =
-        `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is the average value. ` +
-        `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
-        `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
-        `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
+      text = `Current time (${statistics.currentTimeMilliseconds.toFixed(2)} ms) is the average value. `;
     }
+
+    text +=
+      `Avg: ${statistics.averageTimeMilliseconds.toFixed(2)} ms, ` +
+      `Min: ${statistics.minTimeMilliseconds.toFixed(2)} ms, ` +
+      `Max: ${statistics.maxTimeMilliseconds.toFixed(2)} ms.`;
 
     return <p>{text}</p>;
   }, [statistics]);
