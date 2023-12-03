@@ -14,6 +14,17 @@
       <Hieroglyph Type="Hiragana" Character="う" Pronunciation="U" Syllable="U" />
       <Hieroglyph Type="Hiragana" Character="え" Pronunciation="E" Syllable="E" />
       <Hieroglyph Type="Hiragana" Character="お" Pronunciation="O" Syllable="O" />
+      <Hieroglyph Type="Hiragana" Character="な" Pronunciation="Na" Syllable="Na" />
+      <Hieroglyph Type="Hiragana" Character="に" Pronunciation="Ni" Syllable="Ni" />
+      <Hieroglyph Type="Hiragana" Character="ぬ" Pronunciation="Nu" Syllable="Nu" />
+      <Hieroglyph Type="Hiragana" Character="ね" Pronunciation="Ne" Syllable="Ne" />
+      <Hieroglyph Type="Hiragana" Character="の" Pronunciation="No" Syllable="No" />
+      <Hieroglyph Type="Hiragana" Character="にゃ" Pronunciation="Nya" Syllable="Nya (Yōon)" Tags="Yōon" />
+      <Hieroglyph Type="Hiragana" Character="にゅ" Pronunciation="Nyu" Syllable="Nyu (Yōon)" Tags="Yōon" />
+      <Hieroglyph Type="Hiragana" Character="にょ" Pronunciation="Nyo" Syllable="Nyo (Yōon)" Tags="Yōon" />
+    </HieroglyphGroup>
+    <HieroglyphGroup Name="Hiragana - Special Characters" Enabled="true">
+      <Hieroglyph Type="Hiragana" Character="っ" Pronunciation="G.C." Syllable="N/A" Tags="Special Characters" />
     </HieroglyphGroup>
     <!-- Katakana -->
     <HieroglyphGroup Name="Katakana" Enabled="false">
@@ -22,6 +33,12 @@
       <Hieroglyph Type="Katakana" Character="ウ" Pronunciation="U" Syllable="U" />
       <Hieroglyph Type="Katakana" Character="エ" Pronunciation="E" Syllable="E" />
       <Hieroglyph Type="Katakana" Character="オ" Pronunciation="O" Syllable="O" />
+      <Hieroglyph Type="Katakana" Character="ー" Pronunciation="L.V." Syllable="N/A" Tags="Special Characters" />
+      <Hieroglyph Type="Katakana" Character="ッ" Pronunciation="G.C." Syllable="N/A" Tags="Special Characters" />
+    </HieroglyphGroup>
+    <HieroglyphGroup Name="Katakana - Special Characters" Enabled="true">
+      <Hieroglyph Type="Katakana" Character="ー" Pronunciation="L.V." Syllable="N/A" Tags="Special Characters" />
+      <Hieroglyph Type="Katakana" Character="ッ" Pronunciation="G.C." Syllable="N/A" Tags="Special Characters" />
     </HieroglyphGroup>
   </HieroglyphGroups>
   <HieroglyphWords>

@@ -1,3 +1,4 @@
+using System;
 using System.Xml.Serialization;
 
 namespace HieroglyphicWritingExerciseTool.Entities;
@@ -18,4 +19,12 @@ public class Hieroglyph
 
     [XmlAttribute("Meaning")]
     public string? Meaning { get; set; }
+
+    [XmlAttribute("Tags")]
+    public string? Tags { get; set; }
+
+    public string[] GetTags()
+    {
+        return Tags?.Split(',', ';') ?? Array.Empty<string>();
+    }
 }

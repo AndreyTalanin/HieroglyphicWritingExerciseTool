@@ -39,20 +39,56 @@ public class ExerciseGenerator
             .Where(hieroglyph => useKanji || hieroglyph.Type != HieroglyphType.Kanji)
             .ToArray();
 
+        int hieroglyphsDistributed = 0;
         HieroglyphModel[] hieroglyphModels = new HieroglyphModel[size];
+        foreach ((string tag, int tagDistribution) in m_configuration.TagsDistribution)
+        {
+            Hieroglyph[] hieroglyphsByTag = hieroglyphsByConfig
+                .Where(hieroglyph => hieroglyph.GetTags().Contains(tag, StringComparer.InvariantCultureIgnoreCase))
+                .ToArray();
+
+            for (int i = 0; i < tagDistribution && hieroglyphsDistributed < size && hieroglyphsByTag.Length > 0; i++)
+            {
+                Hieroglyph hieroglyph = hieroglyphsByTag[Random.Shared.Next(hieroglyphsByTag.Length)];
+
+                string hieroglyphType = hieroglyph.Type.ToString();
+                hieroglyphModels[hieroglyphsDistributed++] = new HieroglyphModel()
+                {
+                    Type = hieroglyphType,
+                    Character = hieroglyph.Character,
+                    Pronunciation = hieroglyph.Pronunciation,
+                    Syllable = hieroglyph.Syllable,
+                    Meaning = hieroglyph.Meaning,
+                };
+            }
+        }
+
+        if (hieroglyphsDistributed < size)
+        {
+            Hieroglyph[] hieroglyphsWithoutTags = hieroglyphsByConfig
+                .Where(hieroglyph => hieroglyph.GetTags().Length == 0)
+                .ToArray();
+
+            while (hieroglyphsDistributed < size && hieroglyphsWithoutTags.Length > 0)
+            {
+                Hieroglyph hieroglyph = hieroglyphsWithoutTags[Random.Shared.Next(hieroglyphsWithoutTags.Length)];
+
+                string hieroglyphType = hieroglyph.Type.ToString();
+                hieroglyphModels[hieroglyphsDistributed++] = new HieroglyphModel()
+                {
+                    Type = hieroglyphType,
+                    Character = hieroglyph.Character,
+                    Pronunciation = hieroglyph.Pronunciation,
+                    Syllable = hieroglyph.Syllable,
+                    Meaning = hieroglyph.Meaning,
+                };
+            }
+        }
+
         for (int i = 0; i < hieroglyphModels.Length; i++)
         {
-            Hieroglyph hieroglyph = hieroglyphsByConfig[Random.Shared.Next(hieroglyphsByConfig.Length)];
-
-            string hieroglyphType = hieroglyph.Type.ToString();
-            hieroglyphModels[i] = new HieroglyphModel()
-            {
-                Type = hieroglyphType,
-                Character = hieroglyph.Character,
-                Pronunciation = hieroglyph.Pronunciation,
-                Syllable = hieroglyph.Syllable,
-                Meaning = hieroglyph.Meaning,
-            };
+            int j = Random.Shared.Next(hieroglyphModels.Length);
+            (hieroglyphModels[i], hieroglyphModels[j]) = (hieroglyphModels[j], hieroglyphModels[i]);
         }
 
         return hieroglyphModels;
