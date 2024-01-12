@@ -10,7 +10,9 @@ import styles from "./HieroglyphExercise.module.css";
 
 type ExerciseMode = "type" | "type-pronunciation" | "character" | "character-pronunciation" | "full-description";
 
+const defaultExerciseSize: number = 36;
 const defaultExerciseMode: ExerciseMode = "character";
+const defaultHieroglyphProperties: HieroglyphProperties = HieroglyphProperties.Pronunciation | HieroglyphProperties.Syllable;
 
 interface ExerciseConfiguration {
   useKanji: boolean;
@@ -30,6 +32,7 @@ const HieroglyphExercise = () => {
   const [mode, setMode] = useState<ExerciseMode>(defaultExerciseMode);
   const [startedOn, setStartedOn] = useState<Date>(new Date());
   const [hieroglyphs, setHieroglyphs] = useState<HieroglyphModel[]>([]);
+  const [hieroglyphProperties, setHieroglyphProperties] = useState<HieroglyphProperties>(defaultHieroglyphProperties);
   const [peekedIndexes, setPeekedIndexes] = useState<Set<number>>(new Set<number>());
   const [displayedIndexes, setDisplayedIndexes] = useState<Set<number>>(new Set<number>());
   const [completedIndexes, setCompletedIndexes] = useState<Set<number>>(new Set<number>());
@@ -38,7 +41,7 @@ const HieroglyphExercise = () => {
   const [initialExerciseConfiguration, setInitialExerciseConfiguration] = useState<ExerciseConfiguration>({
     useKanji: false,
     useKanjiOnly: false,
-    size: 36,
+    size: defaultExerciseSize,
     mode: defaultExerciseMode,
   });
 
@@ -53,14 +56,21 @@ const HieroglyphExercise = () => {
     if (mode === "type") {
       return HieroglyphProperties.Type;
     } else if (mode === "type-pronunciation") {
-      return HieroglyphProperties.Type | HieroglyphProperties.Pronunciation;
+      return HieroglyphProperties.Type | HieroglyphProperties.Onyomi | HieroglyphProperties.Kunyomi | HieroglyphProperties.Pronunciation;
     } else if (mode === "character") {
       return HieroglyphProperties.Character;
     } else if (mode === "character-pronunciation") {
-      return HieroglyphProperties.Character | HieroglyphProperties.Pronunciation;
+      return HieroglyphProperties.Character | HieroglyphProperties.Onyomi | HieroglyphProperties.Kunyomi | HieroglyphProperties.Pronunciation;
     } else {
       /* if (mode === "full-description") */
-      return HieroglyphProperties.Type | HieroglyphProperties.Pronunciation | HieroglyphProperties.Syllable | HieroglyphProperties.Meaning;
+      return (
+        HieroglyphProperties.Type |
+        HieroglyphProperties.Onyomi |
+        HieroglyphProperties.Kunyomi |
+        HieroglyphProperties.Pronunciation |
+        HieroglyphProperties.Syllable |
+        HieroglyphProperties.Meaning
+      );
     }
   }, [mode]);
 
@@ -83,6 +93,12 @@ const HieroglyphExercise = () => {
       if (hiddenProperties & HieroglyphProperties.Pronunciation && !(record.peeked || record.displayed)) {
         record.pronunciation = "???";
       }
+      if (hiddenProperties & HieroglyphProperties.Onyomi && !(record.peeked || record.displayed)) {
+        record.onyomi = "???";
+      }
+      if (hiddenProperties & HieroglyphProperties.Kunyomi && !(record.peeked || record.displayed)) {
+        record.kunyomi = "???";
+      }
       if (hiddenProperties & HieroglyphProperties.Syllable && !(record.peeked || record.displayed)) {
         record.syllable = "???";
       }
@@ -101,6 +117,7 @@ const HieroglyphExercise = () => {
   const onResetButtonClick = useCallback(() => {
     setStartedOn(new Date());
     setHieroglyphs([]);
+    setHieroglyphProperties(defaultHieroglyphProperties);
     setPeekedIndexes(new Set<number>());
     setDisplayedIndexes(new Set<number>());
     setCompletedIndexes(new Set<number>());
@@ -183,6 +200,11 @@ const HieroglyphExercise = () => {
       setMode(mode);
       setStartedOn(new Date());
       setHieroglyphs(response.hieroglyphs);
+      setHieroglyphProperties(
+        HieroglyphProperties.None |
+          (response.useKanjiColumns ? HieroglyphProperties.Onyomi | HieroglyphProperties.Kunyomi | HieroglyphProperties.Meaning : HieroglyphProperties.None) |
+          (response.useKanjiColumnsOnly ? HieroglyphProperties.None : HieroglyphProperties.Pronunciation | HieroglyphProperties.Syllable)
+      );
       setPeekedIndexes(new Set<number>());
       setDisplayedIndexes(new Set<number>());
       setCompletedIndexes(new Set<number>());
@@ -213,23 +235,56 @@ const HieroglyphExercise = () => {
         title: "Type",
         dataIndex: "type",
       },
-      {
-        key: "pronunciation",
-        title: "Pronunciation",
-        dataIndex: "pronunciation",
-      },
-      {
-        key: "syllable",
-        title: "Syllable (?)",
-        dataIndex: "syllable",
-        render: (syllable?: string) => syllable ?? <Typography.Text type="secondary">N/A</Typography.Text>,
-      },
-      {
-        key: "meaning",
-        title: "Meaning (?)",
-        dataIndex: "meaning",
-        render: (meaning?: string) => meaning ?? <Typography.Text type="secondary">N/A</Typography.Text>,
-      },
+      ...(hieroglyphProperties & HieroglyphProperties.Onyomi
+        ? [
+            {
+              key: "onyomi",
+              title: "Onyomi",
+              dataIndex: "onyomi",
+              render: (onyomi?: string) => onyomi ?? <Typography.Text type="secondary">N/A</Typography.Text>,
+            },
+          ]
+        : []),
+      ...(hieroglyphProperties & HieroglyphProperties.Kunyomi
+        ? [
+            {
+              key: "kunyomi",
+              title: "Kunyomi",
+              dataIndex: "kunyomi",
+              render: (kunyomi?: string) => kunyomi ?? <Typography.Text type="secondary">N/A</Typography.Text>,
+            },
+          ]
+        : []),
+      ...(hieroglyphProperties & HieroglyphProperties.Pronunciation
+        ? [
+            {
+              key: "pronunciation",
+              title: "Pronunciation",
+              dataIndex: "pronunciation",
+              render: (pronunciation?: string) => pronunciation ?? <Typography.Text type="secondary">N/A</Typography.Text>,
+            },
+          ]
+        : []),
+      ...(hieroglyphProperties & HieroglyphProperties.Syllable
+        ? [
+            {
+              key: "syllable",
+              title: "Syllable (?)",
+              dataIndex: "syllable",
+              render: (syllable?: string) => syllable ?? <Typography.Text type="secondary">N/A</Typography.Text>,
+            },
+          ]
+        : []),
+      ...(hieroglyphProperties & HieroglyphProperties.Meaning
+        ? [
+            {
+              key: "meaning",
+              title: "Meaning (?)",
+              dataIndex: "meaning",
+              render: (meaning?: string) => meaning ?? <Typography.Text type="secondary">N/A</Typography.Text>,
+            },
+          ]
+        : []),
       {
         key: "action",
         title: "Action",
@@ -248,7 +303,7 @@ const HieroglyphExercise = () => {
         ),
       },
     ],
-    [completed, onPeekButtonClick, onDisplayButtonClick, onCompleteCheckboxChanged]
+    [completed, hieroglyphProperties, onPeekButtonClick, onDisplayButtonClick, onCompleteCheckboxChanged]
   );
 
   const statisticsParagraph = useMemo(() => {

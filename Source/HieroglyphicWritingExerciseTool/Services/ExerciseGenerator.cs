@@ -57,6 +57,8 @@ public class ExerciseGenerator
                     Type = hieroglyphType,
                     Character = hieroglyph.Character,
                     Pronunciation = hieroglyph.Pronunciation,
+                    Onyomi = hieroglyph.Onyomi,
+                    Kunyomi = hieroglyph.Kunyomi,
                     Syllable = hieroglyph.Syllable,
                     Meaning = hieroglyph.Meaning,
                 };
@@ -79,6 +81,8 @@ public class ExerciseGenerator
                     Type = hieroglyphType,
                     Character = hieroglyph.Character,
                     Pronunciation = hieroglyph.Pronunciation,
+                    Onyomi = hieroglyph.Onyomi,
+                    Kunyomi = hieroglyph.Kunyomi,
                     Syllable = hieroglyph.Syllable,
                     Meaning = hieroglyph.Meaning,
                 };

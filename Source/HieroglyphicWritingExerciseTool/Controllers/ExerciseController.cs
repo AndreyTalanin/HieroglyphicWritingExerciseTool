@@ -39,8 +39,16 @@ public class ExerciseController : ControllerBase
         bool useKanji = request.UseKanji;
         bool useKanjiOnly = request.UseKanjiOnly;
         int size = request.Size;
+
+        useKanji |= useKanjiOnly;
         HieroglyphModel[] hieroglyphs = await m_exerciseGenerator.GenerateHieroglyphExerciseAsync(useKanji, useKanjiOnly, size, cancellationToken);
-        GenerateHieroglyphExerciseResponse response = new() { Hieroglyphs = hieroglyphs };
+        GenerateHieroglyphExerciseResponse response = new()
+        {
+            UseKanjiColumns = useKanji,
+            UseKanjiColumnsOnly = useKanjiOnly,
+            Hieroglyphs = hieroglyphs
+        };
+
         return Ok(response);
     }
 

@@ -12,7 +12,13 @@ public class Hieroglyph
     public string Character { get; set; } = string.Empty;
 
     [XmlAttribute("Pronunciation")]
-    public string Pronunciation { get; set; } = string.Empty;
+    public string? Pronunciation { get; set; }
+
+    [XmlAttribute("Onyomi")]
+    public string? Onyomi { get; set; }
+
+    [XmlAttribute("Kunyomi")]
+    public string? Kunyomi { get; set; }
 
     [XmlAttribute("Syllable")]
     public string? Syllable { get; set; }

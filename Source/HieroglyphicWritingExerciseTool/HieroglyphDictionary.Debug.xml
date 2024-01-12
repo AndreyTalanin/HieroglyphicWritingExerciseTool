@@ -2,9 +2,10 @@
 <HieroglyphDictionary>
   <Hieroglyphs>
     <!-- Kanji -->
-    <Hieroglyph Type="Kanji" Character="赤" Pronunciation="Aka" Meaning="Red (Color)" />
-    <Hieroglyph Type="Kanji" Character="緑" Pronunciation="Midori" Meaning="Green (Color)" />
-    <Hieroglyph Type="Kanji" Character="青" Pronunciation="Ao" Meaning="Blue (Color)" />
+    <Hieroglyph Type="Kanji" Character="川" Onyomi="Sen" Kunyomi="Kawa" Meaning="River" />
+    <Hieroglyph Type="Kanji" Character="山" Onyomi="San" Kunyomi="Yama" Meaning="Mountain" />
+    <Hieroglyph Type="Kanji" Character="木" Onyomi="Boku, Moku" Kunyomi="Ki, Ko" Meaning="Tree" />
+    <Hieroglyph Type="Kanji" Character="本" Onyomi="Hon" Kunyomi="Moto" Meaning="Book" />
   </Hieroglyphs>
   <HieroglyphGroups>
     <!-- Hiragana -->
