@@ -9,9 +9,11 @@ import { ProcessExerciseStatisticsRequest } from "./models/ProcessExerciseStatis
 import styles from "./HieroglyphExercise.module.css";
 
 type ExerciseMode = "type" | "type-pronunciation" | "character" | "character-pronunciation" | "full-description";
+type ExerciseKanjiMode = "with-no-kanji" | "with-kanji" | "with-kanji-only";
 
 const defaultExerciseSize: number = 36;
 const defaultExerciseMode: ExerciseMode = "character";
+const defaultExerciseKanjiMode: ExerciseKanjiMode = "with-no-kanji";
 const defaultHieroglyphProperties: HieroglyphProperties = HieroglyphProperties.Pronunciation | HieroglyphProperties.Syllable;
 
 interface ExerciseConfiguration {
@@ -30,6 +32,7 @@ interface HieroglyphRecord extends HieroglyphModel {
 
 const HieroglyphExercise = () => {
   const [mode, setMode] = useState<ExerciseMode>(defaultExerciseMode);
+  const [kanjiMode, setKanjiMode] = useState<ExerciseKanjiMode>(defaultExerciseKanjiMode);
   const [startedOn, setStartedOn] = useState<Date>(new Date());
   const [hieroglyphs, setHieroglyphs] = useState<HieroglyphModel[]>([]);
   const [hieroglyphProperties, setHieroglyphProperties] = useState<HieroglyphProperties>(defaultHieroglyphProperties);
@@ -167,11 +170,14 @@ const HieroglyphExercise = () => {
   useEffect(() => {
     if (!completed && hieroglyphsTotal === hieroglyphsCompleted && hieroglyphsTotal !== 0) {
       setCompleted(true);
+      let modeString;
+      modeString = `hieroglyph-exercise-${mode}`;
+      modeString = kanjiMode !== "with-no-kanji" ? `${modeString}-${kanjiMode}` : modeString;
       const completedOn = new Date();
       const request: ProcessExerciseStatisticsRequest = {
         exerciseSize: hieroglyphsTotal,
         totalTimeMilliseconds: completedOn.getTime() - startedOn.getTime(),
-        key: `hieroglyph-exercise-${mode}`,
+        key: modeString,
         writeStatistics: hieroglyphsPeeked === 0,
       };
       processExerciseStatistics(request).then((response) => {
@@ -184,7 +190,7 @@ const HieroglyphExercise = () => {
         });
       });
     }
-  }, [mode, startedOn, completed, hieroglyphsTotal, hieroglyphsPeeked, hieroglyphsCompleted]);
+  }, [mode, kanjiMode, startedOn, completed, hieroglyphsTotal, hieroglyphsPeeked, hieroglyphsCompleted]);
 
   const onBackToTopButtonClick = useCallback(() => {
     window.scrollTo({ top: 0 });
@@ -198,6 +204,7 @@ const HieroglyphExercise = () => {
       size: size,
     }).then((response) => {
       setMode(mode);
+      setKanjiMode(useKanjiOnly ? "with-kanji-only" : useKanji ? "with-kanji" : "with-no-kanji");
       setStartedOn(new Date());
       setHieroglyphs(response.hieroglyphs);
       setHieroglyphProperties(
